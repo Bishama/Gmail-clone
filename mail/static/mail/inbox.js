@@ -28,35 +28,35 @@ function load_mailbox(mailbox,email_id) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
-
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
-
-
   //API 1
 fetch(`/emails/${mailbox}`)
 .then(response => response.json())
 .then(emails => {
     // Query the API for latest emails 
+    // Each email should be a link
     // Each email should then be rendered in its own box (e.g. as a <div> with a border) that displays who the email is from, what the subject line is, and the timestamp of the email.
     emails.forEach(email => {
-    const element = document.createElement('div');
-    element.setAttribute("class", "border border-secondary mt-2");
+    let elem = document.createElement('div');
     //If the email is unread, it should appear with a white background. If the email has been read, it should appear with a gray background.
-    element.read ? element.style.backgroundColor = 'lightgrey' : element.style.backgroundColor = 'white';
-    element.innerHTML += `<b> ${email['sender']} <b> `;
-    element.innerHTML += `<span> ${email['subject']} <span>`;
-    element.innerHTML += `<span> <i> ${email['timestamp']} <i><span> `;
-    document.querySelector('#emails-view').append(element);
+    elem.read ? elem.style.backgroundColor = 'lightgrey' : elem.style.backgroundColor = 'white';
+    elem.innerHTML += `<b> ${email['sender']} <b> `;
+    elem.innerHTML += `<span> ${email['subject']} <span>`;
+    elem.innerHTML += `<span> <i> ${email['timestamp']} <i><span> `;
+    document.querySelector('#emails-view').append(elem);
+    //When email is clicked call view_email functio
+    elem.addEventListener('click', () => view_email(email['id']));
+
     });
 });
 
 }
 
 function view_email (email_id) {
-
+  //Show email view and hide other views
+  document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
 //API 
