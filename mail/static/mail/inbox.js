@@ -5,16 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
+  document.querySelector('#compose-form').addEventListener('submit', send_mail);
   // By default, load the inbox
   load_mailbox('inbox');
-  // Call function when user submit
-  document.querySelector('#compose-form').onsubmit = send_mail;
 });
 
 function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -23,9 +23,10 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 }
 
-function load_mailbox(mailbox,email_id) {
+function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
   // Show the mailbox name
@@ -35,23 +36,26 @@ fetch(`/emails/${mailbox}`)
 .then(response => response.json())
 .then(emails => {
     // Query the API for latest emails 
-    // Each email should be a link
+    // Each email should be a link ?? NS
     // Each email should then be rendered in its own box (e.g. as a <div> with a border) that displays who the email is from, what the subject line is, and the timestamp of the email.
     emails.forEach(email => {
+    console.log(email, 'before read');
     let elem = document.createElement('div');
     //If the email is unread, it should appear with a white background. If the email has been read, it should appear with a gray background.
     elem.read ? elem.style.backgroundColor = 'lightgrey' : elem.style.backgroundColor = 'white';
     elem.innerHTML += `<b> ${email['sender']} <b> `;
     elem.innerHTML += `<span> ${email['subject']} <span>`;
     elem.innerHTML += `<span> <i> ${email['timestamp']} <i><span> `;
-    document.querySelector('#emails-view').append(elem);
-    //When email is clicked call view_email functio
+    // add listener and append to DOM
     elem.addEventListener('click', () => view_email(email['id']));
-
+    document.querySelector('#emails-view').append(elem);
+    //console.log(elem);
+     
     });
 });
 
 }
+
 
 function view_email (email_id) {
   //Show email view and hide other views
@@ -59,21 +63,38 @@ function view_email (email_id) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
 
-//API 
-//make a GET request to /emails/<email_id> to request the email
-fetch(`/emails/${email_id}`)
-.then(response => response.json())
-.then(email => {
-// Print email
- console.log(email);
-//show the email’s sender, recipients, subject, timestamp, and body.
-// add an additional div to inbox.html (in addition to emails-view and compose-view) for displaying the email.
-//add an event listener to an HTML element that you’ve added to the DOM
-//Once the email has been clicked on, you should mark the email as read. PUT request to /emails/<email_id> to update whether an email is read or not
+  //API 
+  //make a GET request to /emails/<email_id> to request the email
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+    //console.log('View email', email_id, email);
+    // display email
+      const view = document.querySelector('#email-view');
+      view.innerHTML = `
+        <ul class="list-group">
+          <li class="list-group-item"><b>From:</b> <span>${email['sender']}</span></li>
+          <li class="list-group-item"><b>To: </b><span>${email['recipients']}</span></li>
+          <li class="list-group-item"><b>Subject:</b> <span>${email['subject']}</span</li>
+          <li class="list-group-item"><b>Time:</b> <span>${email['timestamp']}</span></li>
+        </ul>
+        <p class="m-2">${email['body']}</p>
+      `;
+
+      // mark this email as read
+    if (!email['read']) {
+      console.log('if Email read is false, set read property to true')
+      fetch(`/emails/${email_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ read : true })
+      })
+    }
+
+    console.log(email, 'After read');
+
 });
 
 }
-
 
 function send_mail() {
   // Send the email in json response when user compose the email
@@ -91,8 +112,8 @@ function send_mail() {
   })
   .then(response => response.json())
   .then(result => {
-      // Print result
-      console.log(result);
+      // Load sent mailbox
+      load_mailbox('sent')
   });
 
 }

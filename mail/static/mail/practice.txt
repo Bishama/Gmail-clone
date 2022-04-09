@@ -1,0 +1,44 @@
+/*
+function view_email (email_id) {
+  //Show email view and hide other views
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+
+  //API 
+  //make a GET request to /emails/<email_id> to request the email
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+    // Print email
+    console.log(email);
+    //show the email’s sender, recipients, subject, timestamp, and body
+    const view = document.querySelector('#email-view');
+    view.innerHTML = `
+      <ul class="list-group">
+      <li class="list-group-item"><b>From:</b> <span>${email['sender']}</span></li>
+      <li class="list-group-item"><b>To: </b><span>${email['recipients']}</span></li>
+      <li class="list-group-item"><b>Subject:</b> <span>${email['subject']}</span</li>
+      <li class="list-group-item"><b>Time:</b> <span>${email['timestamp']}</span></li>
+      </ul>
+      <p class="m-2">${email['body']}</p>
+      `;
+    // create reply button & append to DOMContentLoaded
+    const reply = document.createElement('button');
+    reply.className = "btn-primary m-1";
+    reply.innerHTML = "Reply";
+    reply.addEventListener('click', function() {
+    compose_email(); })
+    //Once the email has been clicked on, you should mark the email as read. PUT request to /emails/<email_id> to update whether an email is read or not
+
+});
+
+}
+*/
+
+
+
+
+
+
+
