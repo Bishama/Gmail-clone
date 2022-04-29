@@ -35,26 +35,70 @@ function load_mailbox(mailbox) {
 fetch(`/emails/${mailbox}`)
 .then(response => response.json())
 .then(emails => {
-    // Query the API for latest emails 
-    // Each email should be a link ?? NS
-    // Each email should then be rendered in its own box (e.g. as a <div> with a border) that displays who the email is from, what the subject line is, and the timestamp of the email.
-    emails.forEach(email => {
-    console.log(email, 'before read');
-    let elem = document.createElement('div');
-    //If the email is unread, it should appear with a white background. If the email has been read, it should appear with a gray background.
-    elem.read ? elem.style.backgroundColor = 'lightgrey' : elem.style.backgroundColor = 'white';
-    elem.innerHTML += `<b> ${email['sender']} <b> `;
-    elem.innerHTML += `<span> ${email['subject']} <span>`;
-    elem.innerHTML += `<span> <i> ${email['timestamp']} <i><span> `;
-    // add listener and append to DOM
-    elem.addEventListener('click', () => view_email(email['id']));
-    document.querySelector('#emails-view').append(elem);
-    //console.log(elem);
-     
+    console.log(emails)
+    emails.forEach(email => show_emails(email,mailbox))  
     });
-});
+  }
 
+
+function show_emails(email,mailbox) {
+  // Each email isrendered in its own box (as a <div> with a border) displaying sender ,subject and timestamp.
+  let email_div = document.createElement('div');
+  email_div.className = "row";
+
+  //Create a div for sender and append to email_div
+  let sender = document.createElement('div')  
+  sender.className = "col-lg-2"
+  if (mailbox == "inbox") {
+    sender.innerHTML = email['sender'];
+  }
+  else {
+    sender.innerHTML = email['recipients'][0];
+  }
+  email_div.append(sender);
+
+  // Create a div for subject and append to email_div
+  let subject = document.createElement('div');
+  subject.className = "col-lg-6";
+  subject.innerHTML = email['subject'];
+  email_div.append(subject);
+
+  //Create a div for timestamp and append to email_div
+  let timestamp = document.createElement('div');
+  timestamp.className = "col-lg-3";
+  timestamp.innerHTML = email['timestamp'];
+  email_div.append(timestamp);
+
+  //Create a div for archive button and append to emai_div
+  if (mailbox !== 'sent') {
+    let button = document.createElement('img');
+    button.src = "static/mail/archive.jpg";
+    button.className = "col-lg-1"
+    button.style.cssText = 'width:20px;height:20px'
+    email_div.append(button)
+
+    // When user click archive button, change the archived boolean value
+     button.addEventListener('click', function() {
+    fetch('/emails/' + email['id'], {
+      method: 'PUT',
+      body: JSON.stringify({ archived : !email['archived'] })
+    })
+    .then(response => load_mailbox('inbox'))
+  });
+ 
+  }
+  
+  //If the email is unread, it will have a white background. If the email has been read, it should appear with a gray background.
+  email['read'] ? email_div.style.backgroundColor = 'lightgrey' : email_div.style.backgroundColor = 'white';
+
+  // When user click on any email, call view_email function  
+  email_div.addEventListener('click', () => view_email(email['id']));
+
+  //Append email_div to emails-view
+  document.querySelector('#emails-view').append(email_div);
 }
+
+  
 
 
 function view_email (email_id) {
@@ -90,8 +134,7 @@ function view_email (email_id) {
       })
     }
 
-    console.log(email, 'After read');
-
+  
 });
 
 }
@@ -112,8 +155,10 @@ function send_mail() {
   })
   .then(response => response.json())
   .then(result => {
-      // Load sent mailbox
-      load_mailbox('sent')
+      console.log(result)
   });
+  localStorage.clear();
+  load_mailbox('sent');
+  return false;       //Returning false to prevent loading the inbox
 
 }
