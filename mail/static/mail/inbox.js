@@ -112,7 +112,6 @@ function view_email (email_id) {
   fetch(`/emails/${email_id}`)
   .then(response => response.json())
   .then(email => {
-    //console.log('View email', email_id, email);
     // display email
       const view = document.querySelector('#email-view');
       view.innerHTML = `
@@ -124,10 +123,8 @@ function view_email (email_id) {
         </ul>
         <p class="m-2">${email['body']}</p>
       `;
-
-      // mark this email as read
+      // mark email as read
     if (!email['read']) {
-      console.log('if Email read is false, set read property to true')
       fetch(`/emails/${email_id}`, {
         method: 'PUT',
         body: JSON.stringify({ read : true })
