@@ -130,7 +130,29 @@ function view_email (email_id) {
         body: JSON.stringify({ read : true })
       })
     }
+    // Add reply button
+    const reply = document.createElement('button');
+    reply.className = "btn-primary m-1";
+    reply.innerHTML = "Reply";
+    reply.addEventListener('click', function() {
+      compose_email();
+      // populate fields with information from email
+      document.querySelector('#compose-recipients').value = email['sender'];
+      let subject = email['subject'];
+      console.log(subject.split(" ", 1)[0], 'Check it out');
+      if (subject.split(" ", 1)[0] != "Re:") {
+        subject = "Re: " + subject;
+      }
+      document.querySelector('#compose-subject').value = subject;
 
+      let body = `
+        On ${email['timestamp']}, ${email['sender']} wrote: ${email['body']}
+      `;
+      document.querySelector('#compose-body').value = body;
+
+    });
+
+    view.append(reply);
   
 });
 
